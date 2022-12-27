@@ -16,7 +16,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
-	va "github.com/kkodecaffeine/go-common/validator"
+
+	// kkss "github.com/kkodecaffeine/go-common/middleware/session"
+	kkva "github.com/kkodecaffeine/go-common/validator"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -66,9 +68,10 @@ func CreateAPIApp() {
 
 	router.Use(JSONMiddleware())
 	router.Use(gin.Recovery())
+	// router.Use(kkss.ValidateSession)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("customPhone", va.RegexPhone())
+		v.RegisterValidation("customPhone", kkva.RegexPhone())
 	}
 
 	frontserver := os.Getenv("FRONT_SERVER_HOST")

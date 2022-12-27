@@ -9,6 +9,6 @@ type Repository interface {
 	SaveOne(model *User) (string, error)
 
 	// GET
-	GetOne(email string) (*dto.PostSignUpResponse, error)
+	GetOne(email string, password ...string) (*dto.PostSignUpResponse, error)
 	GetOneByID(ID string) (*dto.PostSignUpResponse, error)
 }

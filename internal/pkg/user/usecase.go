@@ -14,7 +14,7 @@ type Usecase interface {
 	SaveOne(request *dto.PostSignUpRequest) (string, error)
 
 	// GET
-	GetOne(email string) *rest.ApiResponse
+	GetOne(email string, password ...string) *rest.ApiResponse
 	GetOneByID(ID string) *rest.ApiResponse
 }
 
@@ -31,10 +31,18 @@ func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, error) {
 	return u.repo.SaveOne(user)
 }
 
-func (u *usecase) GetOne(email string) *rest.ApiResponse {
+func (u *usecase) GetOne(email string, password ...string) *rest.ApiResponse {
 	response := rest.NewApiResponse()
 
-	result, err := u.repo.GetOne(email)
+	var result *dto.PostSignUpResponse
+	var err error
+
+	if len(password) == 0 {
+		result, err = u.repo.GetOne(email)
+	} else {
+		result, err = u.repo.GetOne(email, password[0])
+	}
+
 	if err != nil {
 		if errortype.IsDecodeError(err) {
 			return response.Error(&errorcode.FAILED_DB_PROCESSING, err.Error(), nil)

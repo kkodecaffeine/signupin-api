@@ -7,12 +7,12 @@ import (
 	"signupin-api/internal/app/api/dto"
 	"signupin-api/internal/pkg/user"
 
-	"gopkg.in/validator.v2"
-
 	"github.com/gin-gonic/gin"
 	v10 "github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/kkodecaffeine/go-common/errorcode"
 	"github.com/kkodecaffeine/go-common/rest"
+	"gopkg.in/validator.v2"
 )
 
 type Controller struct {
@@ -26,6 +26,7 @@ func NewController(e *gin.Engine, uc user.Usecase) Controller {
 	v1 := e.Group("/v1")
 	v1.POST("/auth/sms", ctrl.SendSMS)
 	v1.POST("/auth/sign-up", ctrl.SignUp)
+	v1.POST("/auth/sign-in", ctrl.SignIn)
 
 	return ctrl
 }
@@ -89,4 +90,34 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 
 	found = ctrl.usecase.GetOneByID(insertedID)
 	c.JSON(http.StatusCreated, found)
+}
+
+// 회원 로그인 API
+func (ctrl *Controller) SignIn(c *gin.Context) {
+	response := rest.NewApiResponse()
+
+	var req dto.PostSignInRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(&errorcode.MISSING_PARAMETERS, err.Error(), nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if err := validator.Validate(req); err != nil {
+		response.Error(&errorcode.INVALID_PARAMETERS, err.Error(), nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	found := ctrl.usecase.GetOne(req.Email, req.Password)
+	if found.Code != errorcode.SUCCESS.Code {
+		response.Error(&errorcode.NOT_FOUND_ERROR, "", nil)
+		c.JSON(errorcode.NOT_FOUND_ERROR.HttpStatusCode, response)
+		return
+	}
+
+	c.JSON(http.StatusOK, found)
+
+	sessionToken := uuid.NewString()
+	c.SetCookie("session_token", sessionToken, 60*2, "/", os.Getenv("FRONT_SERVER_HOST"), false, true)
 }

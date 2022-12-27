@@ -9,6 +9,7 @@ import (
 	"github.com/kkodecaffeine/go-common/core/database/mongo/errortype"
 	"github.com/kkodecaffeine/go-common/utils"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -30,9 +31,20 @@ func (r *userRepo) SaveOne(model *user.User) (string, error) {
 	return insertedID, nil
 }
 
-func (r *userRepo) GetOne(email string) (*dto.PostSignUpResponse, error) {
+func (r *userRepo) GetOne(email string, password ...string) (*dto.PostSignUpResponse, error) {
 	found := &user.User{}
-	filter := bson.M{"email": email}
+	var filter primitive.M
+
+	if len(password) == 0 {
+		filter = bson.M{"email": email}
+	} else {
+		filter = bson.M{
+			"$and": []bson.M{
+				{"email": email},
+				{"password": password[0]},
+			},
+		}
+	}
 
 	err := mgm.Coll(found).FindOne(mgm.Ctx(), filter).Decode(found)
 	if err != nil {

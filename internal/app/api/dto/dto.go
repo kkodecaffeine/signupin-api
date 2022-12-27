@@ -8,6 +8,7 @@ type PostSMSResponse struct {
 	AuthNumber string `json:"authnumber"`
 }
 
+// 회원 가입
 type PostSignUpRequest struct {
 	AuthNumber string `json:"authnumber" binding:"required" validate:"len=6"`
 	Email      string `json:"email" binding:"required"`
@@ -23,4 +24,14 @@ type PostSignUpResponse struct {
 	NickName string `json:"nickname"`
 	Name     string `json:"name"`
 	Phone    string `json:"phone"`
+}
+
+// 회원 로그인
+type PostSignInRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type PostSignInResponse struct {
+	Id string `json:"id"`
 }
