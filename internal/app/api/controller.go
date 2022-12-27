@@ -42,7 +42,7 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, response)
 				return
 			} else {
-				response.Error(&errorcode.INVALID_PARAMETERS, fmt.Sprintf("%s", element.Field()), nil)
+				response.Error(&errorcode.INVALID_PARAMETERS, fmt.Sprintf("tag: %s", element.Field()), nil)
 				c.JSON(http.StatusBadRequest, response)
 				return
 			}
