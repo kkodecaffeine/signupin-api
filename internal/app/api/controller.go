@@ -80,15 +80,13 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 		return
 	}
 
-	insertedID, _ := ctrl.usecase.SaveOne(&req)
-	found = ctrl.usecase.GetOneByID(insertedID)
-
-	if found.Code == errorcode.SUCCESS.Code {
-		response.Error(&errorcode.AUTH_EMAIL_ALREADY_EXISTS, "", nil)
-		c.JSON(errorcode.AUTH_EMAIL_ALREADY_EXISTS.HttpStatusCode, response)
+	insertedID, err := ctrl.usecase.SaveOne(&req)
+	if err != nil {
+		response.Error(&errorcode.BAD_REQUEST, err.Error(), nil)
+		c.JSON(errorcode.BAD_REQUEST.HttpStatusCode, response)
 		return
 	}
 
-	response.Created("", found)
-	c.JSON(http.StatusOK, response)
+	found = ctrl.usecase.GetOneByID(insertedID)
+	c.JSON(http.StatusCreated, found)
 }

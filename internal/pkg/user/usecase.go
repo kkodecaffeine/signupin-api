@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"signupin-api/internal/app/api/dto"
 
 	"github.com/kkodecaffeine/go-common/core/database/mongo/errortype"
@@ -24,6 +25,9 @@ type usecase struct {
 func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, error) {
 	user := newUser(req)
 
+	if user == nil {
+		return "", errors.New("auth number mismatch")
+	}
 	return u.repo.SaveOne(user)
 }
 
@@ -74,8 +78,8 @@ func (u *usecase) GetOneByID(ID string) *rest.ApiResponse {
 }
 
 // NewUsecase returns new Usecase implementation
-func NewUsecase() Usecase {
-	return &usecase{}
+func NewUsecase(userRepo Repository) Usecase {
+	return &usecase{repo: userRepo}
 }
 
 var _ Usecase = &usecase{}

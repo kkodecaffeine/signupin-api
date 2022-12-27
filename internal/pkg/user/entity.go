@@ -1,7 +1,9 @@
 package user
 
 import (
+	"os"
 	"signupin-api/internal/app/api/dto"
+	"strings"
 
 	"github.com/kamva/mgm/v3"
 )
@@ -17,6 +19,11 @@ type User struct {
 }
 
 func newUser(req *dto.PostSignUpRequest) *User {
+	result := compareAuthNumber(req.AuthNumber)
+	if !result {
+		return nil
+	}
+
 	return &User{
 		Email:    req.Email,
 		Name:     req.Name,
@@ -24,4 +31,8 @@ func newUser(req *dto.PostSignUpRequest) *User {
 		Password: req.Password,
 		Phone:    req.Phone,
 	}
+}
+
+func compareAuthNumber(authnumber string) bool {
+	return strings.EqualFold(authnumber, os.Getenv("AUTH_NUMBER"))
 }

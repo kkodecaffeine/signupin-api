@@ -8,6 +8,8 @@ import (
 
 	"signupin-api/internal/pkg/user"
 
+	userrepo "signupin-api/internal/pkg/user/persistence"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -15,6 +17,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	va "github.com/kkodecaffeine/go-common/validator"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -25,9 +28,10 @@ type App interface {
 }
 
 type apiApp struct {
+	client *mongo.Client
 }
 
-func (ag *apiApp) Init() {
+func (app *apiApp) Init() {
 	err := godotenv.Load("../config/.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -36,12 +40,12 @@ func (ag *apiApp) Init() {
 	_ = mgm.SetDefaultConfig(&mgm.Config{CtxTimeout: 12 * time.Second}, "users", options.Client().ApplyURI(os.Getenv("MONGO_URL")))
 }
 
-func (ag *apiApp) RegisterRoute(driver *gin.Engine) {
-	user_uc := user.NewUsecase()
+func (app *apiApp) RegisterRoute(driver *gin.Engine) {
+	user_uc := user.NewUsecase(userrepo.New(app.client))
 	NewController(driver, user_uc)
 }
 
-func (ag *apiApp) Clean() error {
+func (app *apiApp) Clean() error {
 	return nil
 }
 
@@ -55,6 +59,8 @@ func JSONMiddleware() gin.HandlerFunc {
 // CreateAPIApp returns new core.App implementation
 func CreateAPIApp() {
 	router := gin.Default()
+	router.RouterGroup = *router.Group("/api")
+
 	app := &apiApp{}
 	app.Init()
 
