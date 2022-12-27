@@ -50,8 +50,6 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 		}
 	}
 
-	// To-do : 전화 번호가 DB 에 존재하는지 확인
-
 	var res dto.PostSMSResponse
 	res.AuthNumber = os.Getenv("AUTH_NUMBER")
 
