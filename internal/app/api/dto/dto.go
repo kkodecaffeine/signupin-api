@@ -1,5 +1,13 @@
 package dto
 
+type PostSMSRequest struct {
+	Phone string `json:"phone" binding:"required,customPhone"`
+}
+
+type PostSMSResponse struct {
+	AuthNumber string `json:"authnumber"`
+}
+
 type PostSignUpRequest struct {
 	Email    string `json:"email" binding:"required"`
 	NickName string `json:"nickname" binding:"required"`

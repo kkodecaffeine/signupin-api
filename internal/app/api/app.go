@@ -10,8 +10,11 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
+	va "github.com/kkodecaffeine/go-common/validator"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -58,7 +61,11 @@ func CreateAPIApp() {
 	router.Use(JSONMiddleware())
 	router.Use(gin.Recovery())
 
-	frontserver := fmt.Sprintf("%s", os.Getenv("FRONT_SERVER_HOST"))
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("customPhone", va.RegexPhone())
+	}
+
+	frontserver := os.Getenv("FRONT_SERVER_HOST")
 
 	// Enable CORS policy
 	router.Use(cors.New(
