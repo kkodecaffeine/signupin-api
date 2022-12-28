@@ -7,6 +7,7 @@ import (
 	"github.com/kkodecaffeine/go-common/core/database/mongo/errortype"
 	"github.com/kkodecaffeine/go-common/errorcode"
 	"github.com/kkodecaffeine/go-common/rest"
+	"github.com/kkodecaffeine/go-common/utils"
 )
 
 // UseCase interface definition
@@ -56,6 +57,13 @@ func (u *usecase) GetOne(email string, password ...string) *rest.ApiResponse {
 	if result == nil {
 		response.Code = errorcode.NOT_FOUND_ERROR.Code
 	} else {
+		token, err := utils.GenerateToken(result.Id)
+
+		if err != nil {
+			return response.Error(&errorcode.ACCESS_DENIED, err.Error(), nil)
+		}
+
+		result.AccessToken = token
 		response.Succeed("", result)
 	}
 

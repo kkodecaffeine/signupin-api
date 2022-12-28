@@ -8,33 +8,25 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/joho/godotenv v1.4.0
 	github.com/kamva/mgm/v3 v3.5.0
-	github.com/kkodecaffeine/go-common/core/database/mongo/errortype v0.0.0-20221227150234-27ccfd638b14
-	github.com/kkodecaffeine/go-common/errorcode v0.0.0-20221227141740-ef0136f25fed
-	github.com/kkodecaffeine/go-common/rest v0.0.0-20221227150725-989ff151ead7
-	github.com/kkodecaffeine/go-common/utils v0.0.0-20221227150234-27ccfd638b14
-	github.com/kkodecaffeine/go-common/validator v0.0.0-20221227141740-ef0136f25fed
+	github.com/kkodecaffeine/go-common/core/database/mongo/errortype v0.0.0-20221228095126-9e5766d47bca
+	github.com/kkodecaffeine/go-common/errorcode v0.0.0-20221228095126-9e5766d47bca
+	github.com/kkodecaffeine/go-common/rest v0.0.0-20221228092213-a1969cc5937e
+	github.com/kkodecaffeine/go-common/utils v0.0.0-20221228095449-100b5068efcb
+	github.com/kkodecaffeine/go-common/validator v0.0.0-20221228094233-4df8404ab4b7
 	go.mongodb.org/mongo-driver v1.11.1
 	gopkg.in/validator.v2 v2.0.1
 )
 
 require (
-	github.com/gin-contrib/sessions v0.0.5 // indirect
-	github.com/gorilla/context v1.1.1 // indirect
-	github.com/gorilla/securecookie v1.1.1 // indirect
-	github.com/gorilla/sessions v1.2.1 // indirect
-)
-
-require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.3.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kkodecaffeine/go-common/middleware/session v0.0.0-20221227150725-989ff151ead7
 	github.com/klauspost/compress v1.15.13 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect

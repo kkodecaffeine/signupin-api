@@ -9,9 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	v10 "github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"github.com/kkodecaffeine/go-common/errorcode"
 	"github.com/kkodecaffeine/go-common/rest"
+
 	"gopkg.in/validator.v2"
 )
 
@@ -117,7 +117,4 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, found)
-
-	sessionToken := uuid.NewString()
-	c.SetCookie("session_token", sessionToken, 60*2, "/", os.Getenv("FRONT_SERVER_HOST"), false, true)
 }

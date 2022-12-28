@@ -19,11 +19,12 @@ type PostSignUpRequest struct {
 }
 
 type PostSignUpResponse struct {
-	Id       string `json:"id"`
-	Email    string `json:"email"`
-	NickName string `json:"nickname"`
-	Name     string `json:"name"`
-	Phone    string `json:"phone"`
+	AccessToken string `json:"accesstoken"`
+	Id          string `json:"id"`
+	Email       string `json:"email"`
+	NickName    string `json:"nickname"`
+	Name        string `json:"name"`
+	Phone       string `json:"phone"`
 }
 
 // 회원 로그인
