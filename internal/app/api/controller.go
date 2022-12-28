@@ -56,8 +56,9 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 		}
 	}
 
-	var res dto.PostSMSResponse
-	res.AuthNumber = os.Getenv("AUTH_NUMBER")
+	res := dto.PostSMSResponse{
+		AuthNumber: os.Getenv("AUTH_NUMBER"),
+	}
 
 	response.Succeed("", res)
 	c.JSON(http.StatusOK, response)
