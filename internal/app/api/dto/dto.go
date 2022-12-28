@@ -18,7 +18,14 @@ type PostSignUpRequest struct {
 	Phone      string `json:"phone" binding:"required,customPhone"`
 }
 
-type PostSignUpResponse struct {
+// 회원 로그인
+type PostSignInRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// 회원 조회
+type GetUserResponse struct {
 	AccessToken string `json:"accesstoken"`
 	Id          string `json:"id"`
 	Email       string `json:"email"`
@@ -27,12 +34,15 @@ type PostSignUpResponse struct {
 	Phone       string `json:"phone"`
 }
 
-// 회원 로그인
-type PostSignInRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 type PostSignInResponse struct {
 	Id string `json:"id"`
+}
+
+// 비밀번호 수정
+type PutPasswordRequest struct {
+	AuthNumber   string `json:"authnumber" binding:"required" validate:"len=6"`
+	Email        string `json:"email" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	NewPassword  string `json:"newpassword" binding:"required"`
+	Confirmation string `json:"confirmation" binding:"required"`
 }

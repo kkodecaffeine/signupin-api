@@ -1,7 +1,6 @@
 package user
 
 import (
-	"errors"
 	"signupin-api/internal/app/api/dto"
 
 	"github.com/kkodecaffeine/go-common/core/database/mongo/errortype"
@@ -12,85 +11,118 @@ import (
 
 // UseCase interface definition
 type Usecase interface {
-	SaveOne(request *dto.PostSignUpRequest) (string, error)
+	SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError)
 
 	// GET
-	GetOne(email string, password ...string) *rest.ApiResponse
-	GetOneByID(ID string) *rest.ApiResponse
+	GetOne(email string, password ...string) (*dto.GetUserResponse, *rest.CustomError)
+	GetOneByID(ID string) (*dto.GetUserResponse, *rest.CustomError)
+
+	// UPDATE
+	UpdatePassword(authnumber, ID, newpassword string) (*dto.GetUserResponse, *rest.CustomError)
 }
 
 type usecase struct {
 	repo Repository
 }
 
-func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, error) {
+func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError) {
 	user := newUser(req)
 
 	if user == nil {
-		return "", errors.New("auth number mismatch")
+		return "", &rest.CustomError{CodeDesc: &errorcode.BAD_REQUEST, Message: "auth number mismatch"}
 	}
-	return u.repo.SaveOne(user)
+
+	insertedID, err := u.repo.SaveOne(user)
+	if err != nil {
+		if errortype.IsDecodeError(err) {
+			return "", &rest.CustomError{CodeDesc: &errorcode.FAILED_DB_PROCESSING, Message: err.Error()}
+		} else if errortype.IsNotFoundErr(err) {
+			return "", &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: err.Error()}
+		} else {
+			return "", &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
+		}
+	}
+	return insertedID, nil
 }
 
-func (u *usecase) GetOne(email string, password ...string) *rest.ApiResponse {
-	response := rest.NewApiResponse()
-
-	var result *dto.PostSignUpResponse
+func (u *usecase) GetOne(email string, password ...string) (*dto.GetUserResponse, *rest.CustomError) {
+	var response *dto.GetUserResponse
 	var err error
 
 	if len(password) == 0 {
-		result, err = u.repo.GetOne(email)
+		response, err = u.repo.GetOne(email)
 	} else {
-		result, err = u.repo.GetOne(email, password[0])
+		response, err = u.repo.GetOne(email, password[0])
 	}
 
 	if err != nil {
 		if errortype.IsDecodeError(err) {
-			return response.Error(&errorcode.FAILED_DB_PROCESSING, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_DB_PROCESSING, Message: err.Error()}
 		} else if errortype.IsNotFoundErr(err) {
-			return response.Error(&errorcode.NOT_FOUND_ERROR, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: err.Error()}
 		} else {
-			return response.Error(&errorcode.FAILED_INTERNAL_ERROR, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
 		}
 	}
 
-	if result == nil {
-		response.Code = errorcode.NOT_FOUND_ERROR.Code
+	if response == nil {
+		return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: ""}
 	} else {
-		token, err := utils.GenerateToken(result.Id)
+		token, err := utils.GenerateToken(response.Id)
 
 		if err != nil {
-			return response.Error(&errorcode.ACCESS_DENIED, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.ACCESS_DENIED, Message: err.Error()}
 		}
-
-		result.AccessToken = token
-		response.Succeed("", result)
+		response.AccessToken = token
 	}
 
-	return response
+	return response, nil
 }
 
-func (u *usecase) GetOneByID(ID string) *rest.ApiResponse {
-	response := rest.NewApiResponse()
-
-	result, err := u.repo.GetOneByID(ID)
+func (u *usecase) GetOneByID(ID string) (*dto.GetUserResponse, *rest.CustomError) {
+	response, err := u.repo.GetOneByID(ID)
 	if err != nil {
 		if errortype.IsDecodeError(err) {
-			return response.Error(&errorcode.FAILED_DB_PROCESSING, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_DB_PROCESSING, Message: err.Error()}
 		} else if errortype.IsNotFoundErr(err) {
-			return response.Error(&errorcode.NOT_FOUND_ERROR, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: err.Error()}
 		} else {
-			return response.Error(&errorcode.FAILED_INTERNAL_ERROR, err.Error(), nil)
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
 		}
 	}
 
-	if result == nil {
-		response.Code = errorcode.NOT_FOUND_ERROR.Code
+	if response == nil {
+		return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: ""}
 	} else {
-		response.Succeed("", result)
+		token, err := utils.GenerateToken(response.Id)
+
+		if err != nil {
+			return response, &rest.CustomError{CodeDesc: &errorcode.ACCESS_DENIED, Message: err.Error()}
+		}
+		response.AccessToken = token
 	}
 
-	return response
+	return response, nil
+}
+
+func (u *usecase) UpdatePassword(authnumber, ID, newpassword string) (*dto.GetUserResponse, *rest.CustomError) {
+	if !compareAuthNumber(authnumber) {
+		return nil, &rest.CustomError{CodeDesc: &errorcode.BAD_REQUEST, Message: "auth number mismatch"}
+	}
+
+	objectID, _ := utils.MapToObjectID(ID)
+
+	response, err := u.repo.UpdatePassword(objectID, newpassword)
+	if err != nil {
+		if errortype.IsDecodeError(err) {
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_DB_PROCESSING, Message: err.Error()}
+		} else if errortype.IsNotFoundErr(err) {
+			return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: err.Error()}
+		} else {
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
+		}
+	}
+	return response, nil
 }
 
 // NewUsecase returns new Usecase implementation

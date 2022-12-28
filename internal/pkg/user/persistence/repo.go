@@ -31,7 +31,7 @@ func (r *userRepo) SaveOne(model *user.User) (string, error) {
 	return insertedID, nil
 }
 
-func (r *userRepo) GetOne(email string, password ...string) (*dto.PostSignUpResponse, error) {
+func (r *userRepo) GetOne(email string, password ...string) (*dto.GetUserResponse, error) {
 	found := &user.User{}
 	var filter primitive.M
 
@@ -56,7 +56,7 @@ func (r *userRepo) GetOne(email string, password ...string) (*dto.PostSignUpResp
 	return result, nil
 }
 
-func (r *userRepo) GetOneByID(ID string) (*dto.PostSignUpResponse, error) {
+func (r *userRepo) GetOneByID(ID string) (*dto.GetUserResponse, error) {
 	objectID, err := utils.MapToObjectID(ID)
 	if err != nil {
 		return nil, err
@@ -69,6 +69,25 @@ func (r *userRepo) GetOneByID(ID string) (*dto.PostSignUpResponse, error) {
 	err = coll.FindOne(mgm.Ctx(), filter).Decode(found)
 	if err != nil {
 		return nil, errortype.ParseAndReturnDBError(err, coll.Name(), filter, nil, nil)
+	}
+
+	result := r.mapper.toDomainProps(found.ID, found)
+
+	return result, nil
+}
+
+func (r *userRepo) UpdatePassword(ID primitive.ObjectID, newpassword string) (*dto.GetUserResponse, error) {
+	found := &user.User{}
+	filter := bson.D{{Key: "_id", Value: ID}}
+
+	coll := mgm.Coll(found)
+	coll.FindOne(mgm.Ctx(), filter).Decode(&found)
+
+	found.Password = newpassword
+
+	err := coll.Update(found)
+	if err != nil {
+		return nil, errortype.ParseAndReturnDBError(err, coll.Name(), nil, nil, nil)
 	}
 
 	result := r.mapper.toDomainProps(found.ID, found)

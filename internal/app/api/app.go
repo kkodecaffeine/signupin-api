@@ -17,7 +17,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 
-	// kkss "github.com/kkodecaffeine/go-common/middleware/session"
 	kkva "github.com/kkodecaffeine/go-common/validator"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -51,13 +50,6 @@ func (app *apiApp) Clean() error {
 	return nil
 }
 
-func JSONMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Content-Type", "application/json")
-		c.Next()
-	}
-}
-
 // CreateAPIApp returns new core.App implementation
 func CreateAPIApp() {
 	router := gin.Default()
@@ -66,9 +58,7 @@ func CreateAPIApp() {
 	app := &apiApp{}
 	app.Init()
 
-	router.Use(JSONMiddleware())
 	router.Use(gin.Recovery())
-	// router.Use(kkss.ValidateSession)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("customPhone", kkva.RegexPhone())

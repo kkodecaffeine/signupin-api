@@ -10,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	v10 "github.com/go-playground/validator/v10"
 	"github.com/kkodecaffeine/go-common/errorcode"
+
+	"github.com/kkodecaffeine/go-common/middleware/token"
 	"github.com/kkodecaffeine/go-common/rest"
 
 	"gopkg.in/validator.v2"
@@ -27,6 +29,9 @@ func NewController(e *gin.Engine, uc user.Usecase) Controller {
 	v1.POST("/auth/sms", ctrl.SendSMS)
 	v1.POST("/auth/sign-up", ctrl.SignUp)
 	v1.POST("/auth/sign-in", ctrl.SignIn)
+
+	authorized := v1.Group("/")
+	authorized.Use(token.JwtAuthMiddleware()).PUT("/users/reset-password", ctrl.UpdatePassword)
 
 	return ctrl
 }
@@ -74,22 +79,29 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 		return
 	}
 
-	found := ctrl.usecase.GetOne(req.Email)
-	if found.Code == errorcode.SUCCESS.Code {
-		response.Error(&errorcode.AUTH_EMAIL_ALREADY_EXISTS, "", nil)
-		c.JSON(errorcode.AUTH_EMAIL_ALREADY_EXISTS.HttpStatusCode, response)
+	_, err := ctrl.usecase.GetOne(req.Email)
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
 		return
 	}
 
 	insertedID, err := ctrl.usecase.SaveOne(&req)
 	if err != nil {
-		response.Error(&errorcode.BAD_REQUEST, err.Error(), nil)
-		c.JSON(errorcode.BAD_REQUEST.HttpStatusCode, response)
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
 		return
 	}
 
-	found = ctrl.usecase.GetOneByID(insertedID)
-	c.JSON(http.StatusCreated, found)
+	found, err := ctrl.usecase.GetOneByID(insertedID)
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
+	}
+
+	response.Succeed("", found)
+	c.JSON(http.StatusOK, response)
 }
 
 // 회원 로그인 API
@@ -109,12 +121,62 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 		return
 	}
 
-	found := ctrl.usecase.GetOne(req.Email, req.Password)
-	if found.Code != errorcode.SUCCESS.Code {
-		response.Error(&errorcode.NOT_FOUND_ERROR, "", nil)
-		c.JSON(errorcode.NOT_FOUND_ERROR.HttpStatusCode, response)
+	found, err := ctrl.usecase.GetOne(req.Email, req.Password)
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
 		return
 	}
 
-	c.JSON(http.StatusOK, found)
+	response.Succeed("", found)
+	c.JSON(http.StatusOK, response)
+}
+
+// 비밀번호 수정 API
+func (ctrl *Controller) UpdatePassword(c *gin.Context) {
+	response := rest.NewApiResponse()
+
+	var req dto.PutPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		for _, element := range err.(v10.ValidationErrors) {
+			if element.ActualTag() == "required" {
+				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
+				c.JSON(http.StatusBadRequest, response)
+				return
+			} else {
+				response.Error(&errorcode.INVALID_PARAMETERS, fmt.Sprintf("tag: %s", element.Field()), nil)
+				c.JSON(http.StatusBadRequest, response)
+				return
+			}
+		}
+	}
+
+	if err := validator.Validate(req); err != nil {
+		response.Error(&errorcode.INVALID_PARAMETERS, err.Error(), nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	if req.NewPassword != req.Confirmation {
+		response.Error(&errorcode.BAD_REQUEST, "password mismatch", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	found, err := ctrl.usecase.GetOne(req.Email, req.Password)
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
+	}
+
+	_, err = ctrl.usecase.UpdatePassword(req.AuthNumber, found.Id, req.NewPassword)
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
+	}
+
+	response.Succeed("", nil)
+	c.JSON(http.StatusOK, response)
 }

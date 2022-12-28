@@ -10,11 +10,11 @@ import (
 
 type entityMapper struct{}
 
-func (e entityMapper) toDomainProps(ID primitive.ObjectID, model *user.User) *dto.PostSignUpResponse {
+func (e entityMapper) toDomainProps(ID primitive.ObjectID, model *user.User) *dto.GetUserResponse {
 
 	id := utils.MapToStringID(ID)
 
-	return &dto.PostSignUpResponse{
+	return &dto.GetUserResponse{
 		Id:       id,
 		Email:    model.Email,
 		Name:     model.Name,
