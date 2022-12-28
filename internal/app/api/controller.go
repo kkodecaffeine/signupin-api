@@ -6,6 +6,7 @@ import (
 	"os"
 	"signupin-api/internal/app/api/dto"
 	"signupin-api/internal/pkg/user"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	v10 "github.com/go-playground/validator/v10"
@@ -112,9 +113,20 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 
 	var req dto.PostSignInRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(&errorcode.MISSING_PARAMETERS, err.Error(), nil)
-		c.JSON(http.StatusBadRequest, response)
-		return
+		for _, element := range err.(v10.ValidationErrors) {
+			if element.ActualTag() == "required" {
+				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
+				c.JSON(http.StatusBadRequest, response)
+				return
+			} else {
+				if len(fmt.Sprintf("%v", element.Value())) == 0 {
+					break
+				}
+				response.Error(&errorcode.INVALID_PARAMETERS, fmt.Sprintf("tag: %s", element.Field()), nil)
+				c.JSON(http.StatusBadRequest, response)
+				return
+			}
+		}
 	}
 
 	if err := validator.Validate(req); err != nil {
@@ -123,7 +135,22 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 		return
 	}
 
-	found, err := ctrl.usecase.GetOne(req.Email, req.Password)
+	if len(strings.TrimSpace(req.Email)) == 0 && len(strings.TrimSpace(req.Phone)) == 0 {
+		response.Error(&errorcode.BAD_REQUEST, "", nil)
+		c.JSON(errorcode.BAD_REQUEST.HttpStatusCode, response)
+		return
+	}
+
+	var identifier string
+	if len(strings.TrimSpace(req.Email)) == 0 {
+		identifier = req.Phone
+	} else if len(strings.TrimSpace(req.Phone)) == 0 {
+		identifier = req.Email
+	} else {
+		identifier = req.Email
+	}
+
+	found, err := ctrl.usecase.GetOne(identifier, req.Password)
 	if err != nil {
 		response.Error(err.CodeDesc, err.Message, err.Data)
 		c.JSON(err.CodeDesc.HttpStatusCode, response)

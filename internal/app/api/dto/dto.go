@@ -20,8 +20,9 @@ type PostSignUpRequest struct {
 
 // 회원 로그인
 type PostSignInRequest struct {
-	Email    string `json:"email" binding:"required"`
+	Email    string `json:"email"`
 	Password string `json:"password" binding:"required"`
+	Phone    string `json:"phone" binding:"customPhone"`
 }
 
 // 회원 조회
