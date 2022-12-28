@@ -38,7 +38,11 @@ func NewController(e *gin.Engine, uc user.Usecase) Controller {
 	return ctrl
 }
 
-// 전화 번호 인증 API
+/**
+ * 전화번호 인증 API
+ * 요청받은 전화번호 검증 수행
+ * @return : authnumber (6자리 난수)
+ */
 func (ctrl *Controller) SendSMS(c *gin.Context) {
 	response := rest.NewApiResponse()
 
@@ -65,7 +69,12 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// 회원 가입 API
+/**
+ * 회원 가입 API
+ * 요청받은 회원 정보 검증 수행
+ * 요청받은 회원 정보가 기존 가입자인지 아닌지 확인 후 신규 가입 처리
+ * @return : 가입 시 생성된 회원 정보 (w/ ID)
+ */
 func (ctrl *Controller) SignUp(c *gin.Context) {
 	response := rest.NewApiResponse()
 
@@ -113,7 +122,12 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// 회원 로그인 API
+/**
+ * 회원 로그인 API
+ * 요청받은 회원 정보 검증 수행
+ * (이메일, 비밀번호) 혹은 (전화번호, 비밀번호) 로 로그인 가능하도록 구현
+ * @return : 가입 시 생성된 회원 정보 (w/ ID, JWT)
+ */
 func (ctrl *Controller) SignIn(c *gin.Context) {
 	response := rest.NewApiResponse()
 
@@ -167,7 +181,11 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// 회원 정보 조회 API
+/**
+ * 회원 정보 조회 API
+ * JWT 검증 과정 후 회원 정보 조회
+ * @return : 가입 시 생성된 회원 정보 (w/ ID)
+ */
 func (ctrl *Controller) GetMe(c *gin.Context) {
 	response := rest.NewApiResponse()
 
@@ -183,7 +201,11 @@ func (ctrl *Controller) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// 비밀번호 수정 API
+/**
+ * 비밀번호 수정 API
+ * JWT 및 요청받은 정보에 대한 검증
+ * 기존 비밀번호로 회원 정보 조회에 성공한 후 요청받은 신규 비밀번호로 비밀번호 변경
+ */
 func (ctrl *Controller) UpdatePassword(c *gin.Context) {
 	response := rest.NewApiResponse()
 
@@ -208,6 +230,7 @@ func (ctrl *Controller) UpdatePassword(c *gin.Context) {
 		return
 	}
 
+	// 사용자가 입력한 "신규 비밀번호"와 "비밀번호 확인" 값이 동일한지 확인
 	if req.NewPassword != req.Confirmation {
 		response.Error(&errorcode.BAD_REQUEST, "password mismatch", nil)
 		c.JSON(http.StatusBadRequest, response)
