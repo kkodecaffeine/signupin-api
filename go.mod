@@ -8,11 +8,11 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/joho/godotenv v1.4.0
 	github.com/kamva/mgm/v3 v3.5.0
-	github.com/kkodecaffeine/go-common/core/database/mongo/errortype v0.0.0-20221228095449-100b5068efcb
-	github.com/kkodecaffeine/go-common/errorcode v0.0.0-20221228095449-100b5068efcb
-	github.com/kkodecaffeine/go-common/middleware/token v0.0.0-20221228095449-100b5068efcb
-	github.com/kkodecaffeine/go-common/rest v0.0.0-20221228095449-100b5068efcb
-	github.com/kkodecaffeine/go-common/utils v0.0.0-20221228095449-100b5068efcb
+	github.com/kkodecaffeine/go-common/core/database/mongo/errortype v0.0.0-20221228115011-3ea7f0b07a27
+	github.com/kkodecaffeine/go-common/errorcode v0.0.0-20221228115011-3ea7f0b07a27
+	github.com/kkodecaffeine/go-common/middleware/token v0.0.0-20221228115011-3ea7f0b07a27
+	github.com/kkodecaffeine/go-common/rest v0.0.0-20221228115011-3ea7f0b07a27
+	github.com/kkodecaffeine/go-common/utils v0.0.0-20221228115011-3ea7f0b07a27
 	github.com/kkodecaffeine/go-common/validator v0.0.0-20221228115011-3ea7f0b07a27
 	go.mongodb.org/mongo-driver v1.11.1
 	gopkg.in/validator.v2 v2.0.1
