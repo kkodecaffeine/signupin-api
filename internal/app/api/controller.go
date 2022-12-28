@@ -31,6 +31,7 @@ func NewController(e *gin.Engine, uc user.Usecase) Controller {
 	v1.POST("/auth/sign-in", ctrl.SignIn)
 
 	authorized := v1.Group("/")
+	authorized.Use(token.JwtAuthMiddleware()).GET("/users/:userID", ctrl.GetMe)
 	authorized.Use(token.JwtAuthMiddleware()).PUT("/users/reset-password", ctrl.UpdatePassword)
 
 	return ctrl
@@ -122,6 +123,22 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 	}
 
 	found, err := ctrl.usecase.GetOne(req.Email, req.Password)
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
+	}
+
+	response.Succeed("", found)
+	c.JSON(http.StatusOK, response)
+}
+
+// 회원 정보 조회 API
+func (ctrl *Controller) GetMe(c *gin.Context) {
+	response := rest.NewApiResponse()
+
+	userID := c.Param("userID")
+	found, err := ctrl.usecase.GetOneByID(userID)
 	if err != nil {
 		response.Error(err.CodeDesc, err.Message, err.Data)
 		c.JSON(err.CodeDesc.HttpStatusCode, response)
