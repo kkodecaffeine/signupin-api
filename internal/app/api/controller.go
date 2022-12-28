@@ -82,10 +82,16 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 		return
 	}
 
-	_, err := ctrl.usecase.GetOne(req.Email)
+	exists, err := ctrl.usecase.GetOne(req.Email)
 	if err != nil {
 		response.Error(err.CodeDesc, err.Message, err.Data)
 		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
+	}
+
+	if exists != nil {
+		response.Error(&errorcode.AUTH_EMAIL_ALREADY_EXISTS, req.Email, "")
+		c.JSON(errorcode.AUTH_EMAIL_ALREADY_EXISTS.HttpStatusCode, response)
 		return
 	}
 
