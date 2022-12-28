@@ -14,7 +14,7 @@ type Usecase interface {
 	SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError)
 
 	// GET
-	GetOne(email string, password ...string) (*dto.GetUserResponse, *rest.CustomError)
+	GetOne(email string, password ...string) (*dto.GetUserWithTokenResponse, *rest.CustomError)
 	GetOneByID(ID string) (*dto.GetUserResponse, *rest.CustomError)
 
 	// UPDATE
@@ -45,8 +45,8 @@ func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError
 	return insertedID, nil
 }
 
-func (u *usecase) GetOne(email string, password ...string) (*dto.GetUserResponse, *rest.CustomError) {
-	var response *dto.GetUserResponse
+func (u *usecase) GetOne(email string, password ...string) (*dto.GetUserWithTokenResponse, *rest.CustomError) {
+	var response *dto.GetUserWithTokenResponse
 	var err error
 
 	if len(password) == 0 {
@@ -94,12 +94,9 @@ func (u *usecase) GetOneByID(ID string) (*dto.GetUserResponse, *rest.CustomError
 	if response == nil {
 		return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: ""}
 	} else {
-		token, err := utils.GenerateToken(response.Id)
-
 		if err != nil {
 			return response, &rest.CustomError{CodeDesc: &errorcode.ACCESS_DENIED, Message: err.Error()}
 		}
-		response.AccessToken = token
 	}
 
 	return response, nil

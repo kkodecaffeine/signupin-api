@@ -31,7 +31,7 @@ func (r *userRepo) SaveOne(model *user.User) (string, error) {
 	return insertedID, nil
 }
 
-func (r *userRepo) GetOne(email string, password ...string) (*dto.GetUserResponse, error) {
+func (r *userRepo) GetOne(email string, password ...string) (*dto.GetUserWithTokenResponse, error) {
 	found := &user.User{}
 	var filter primitive.M
 
@@ -51,7 +51,7 @@ func (r *userRepo) GetOne(email string, password ...string) (*dto.GetUserRespons
 		return nil, errortype.ParseAndReturnDBError(err, mgm.CollName(found), filter, nil, nil)
 	}
 
-	result := r.mapper.toDomainProps(found.ID, found)
+	result := r.mapper.toDomainProps2(found.ID, found)
 
 	return result, nil
 }

@@ -26,6 +26,14 @@ type PostSignInRequest struct {
 
 // 회원 조회
 type GetUserResponse struct {
+	Id       string `json:"id"`
+	Email    string `json:"email"`
+	NickName string `json:"nickname"`
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+}
+
+type GetUserWithTokenResponse struct {
 	AccessToken string `json:"accesstoken"`
 	Id          string `json:"id"`
 	Email       string `json:"email"`
