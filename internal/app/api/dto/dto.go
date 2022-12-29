@@ -12,9 +12,9 @@ type PostSMSResponse struct {
 type PostSignUpRequest struct {
 	AuthNumber string `json:"authnumber" binding:"required" validate:"len=6"` // 인증번호
 	Email      string `json:"email" binding:"required,customEmail"`           // 이메일
-	NickName   string `json:"nickname" binding:"required" validate:"len=2"`   // 닉네임
-	Name       string `json:"name" binding:"required" validate:"len=2"`       // 이름
-	Password   string `json:"password" binding:"required" validate:"len=8"`   // 비밀번호
+	NickName   string `json:"nickname" binding:"required" validate:"min=2"`   // 닉네임
+	Name       string `json:"name" binding:"required" validate:"min=2"`       // 이름
+	Password   string `json:"password" binding:"required" validate:"min=8"`   // 비밀번호
 	Phone      string `json:"phone" binding:"required,customPhone"`           // 전화번호
 }
 
@@ -51,7 +51,7 @@ type PostSignInResponse struct {
 type PutPasswordRequest struct {
 	AuthNumber   string `json:"authnumber" binding:"required" validate:"len=6"`   // 인증번호
 	Email        string `json:"email" binding:"required,customEmail"`             // 이메일
-	Password     string `json:"password" binding:"required" validate:"len=8"`     // 비밀번호
-	NewPassword  string `json:"newpassword" binding:"required" validate:"len=8"`  // 신규 비밀번호
-	Confirmation string `json:"confirmation" binding:"required" validate:"len=8"` // 신규 비밀번호 확인
+	Password     string `json:"password" binding:"required" validate:"min=8"`     // 비밀번호
+	NewPassword  string `json:"newpassword" binding:"required" validate:"min=8"`  // 신규 비밀번호
+	Confirmation string `json:"confirmation" binding:"required" validate:"min=8"` // 신규 비밀번호 확인
 }

@@ -42,8 +42,10 @@ func (app *apiApp) Init() {
 }
 
 func (app *apiApp) RegisterRoute(driver *gin.Engine) {
+	v := validator.New()
+
 	user_uc := user.NewUsecase(userrepo.New(app.client))
-	NewController(driver, user_uc)
+	NewController(driver, v, user_uc)
 }
 
 func (app *apiApp) Clean() error {

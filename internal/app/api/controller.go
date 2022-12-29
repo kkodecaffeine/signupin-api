@@ -8,22 +8,23 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+
 	v10 "github.com/go-playground/validator/v10"
 	"github.com/kkodecaffeine/go-common/errorcode"
 	"github.com/kkodecaffeine/go-common/middleware/token"
 
 	"github.com/kkodecaffeine/go-common/rest"
-
-	"gopkg.in/validator.v2"
 )
 
 type Controller struct {
+	v       *validator.Validate
 	usecase user.Usecase
 }
 
 // NewController returns new controller instance
-func NewController(e *gin.Engine, uc user.Usecase) Controller {
-	ctrl := Controller{uc}
+func NewController(e *gin.Engine, v *validator.Validate, uc user.Usecase) Controller {
+	ctrl := Controller{v, uc}
 
 	v1 := e.Group("/v1")
 	v1.POST("/auth/sms", ctrl.SendSMS)
@@ -102,7 +103,7 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 		}
 	}
 
-	if err := validator.Validate(req); err != nil {
+	if err := ctrl.v.Struct(req); err != nil {
 		response.Error(&errorcode.INVALID_PARAMETERS, err.Error(), nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
@@ -160,7 +161,7 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 		}
 	}
 
-	if err := validator.Validate(req); err != nil {
+	if err := ctrl.v.Struct(req); err != nil {
 		response.Error(&errorcode.INVALID_PARAMETERS, err.Error(), nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
@@ -235,7 +236,7 @@ func (ctrl *Controller) UpdatePassword(c *gin.Context) {
 		}
 	}
 
-	if err := validator.Validate(req); err != nil {
+	if err := ctrl.v.Struct(req); err != nil {
 		response.Error(&errorcode.INVALID_PARAMETERS, err.Error(), nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
