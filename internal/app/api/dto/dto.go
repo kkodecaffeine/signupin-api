@@ -11,16 +11,16 @@ type PostSMSResponse struct {
 // 회원 가입
 type PostSignUpRequest struct {
 	AuthNumber string `json:"authnumber" binding:"required" validate:"len=6"` // 인증번호
-	Email      string `json:"email" binding:"required"`                       // 이메일
-	NickName   string `json:"nickname" binding:"required"`                    // 닉네임
-	Name       string `json:"name" binding:"required"`                        // 이름
-	Password   string `json:"password" binding:"required"`                    // 비밀번호
+	Email      string `json:"email" binding:"required,customEmail"`           // 이메일
+	NickName   string `json:"nickname" binding:"required" validate:"len=2"`   // 닉네임
+	Name       string `json:"name" binding:"required" validate:"len=2"`       // 이름
+	Password   string `json:"password" binding:"required" validate:"len=8"`   // 비밀번호
 	Phone      string `json:"phone" binding:"required,customPhone"`           // 전화번호
 }
 
 // 회원 로그인
 type PostSignInRequest struct {
-	Email    string `json:"email"`                       // 이메일
+	Email    string `json:"email" binding:"customEmail"` // 이메일
 	Password string `json:"password" binding:"required"` // 비밀번호
 	Phone    string `json:"phone" binding:"customPhone"` // 전화번호
 }
@@ -49,9 +49,9 @@ type PostSignInResponse struct {
 
 // 비밀번호 수정
 type PutPasswordRequest struct {
-	AuthNumber   string `json:"authnumber" binding:"required" validate:"len=6"` // 인증번호
-	Email        string `json:"email" binding:"required"`                       // 이메일
-	Password     string `json:"password" binding:"required"`                    // 기존 비밀번호
-	NewPassword  string `json:"newpassword" binding:"required"`                 // 신규 비밀번호
-	Confirmation string `json:"confirmation" binding:"required"`                // 신규 비밀번호 확인
+	AuthNumber   string `json:"authnumber" binding:"required" validate:"len=6"`   // 인증번호
+	Email        string `json:"email" binding:"required,customEmail"`             // 이메일
+	Password     string `json:"password" binding:"required" validate:"len=8"`     // 비밀번호
+	NewPassword  string `json:"newpassword" binding:"required" validate:"len=8"`  // 신규 비밀번호
+	Confirmation string `json:"confirmation" binding:"required" validate:"len=8"` // 신규 비밀번호 확인
 }

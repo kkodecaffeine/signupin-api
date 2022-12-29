@@ -86,9 +86,20 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 
 	var req dto.PostSignUpRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(&errorcode.MISSING_PARAMETERS, err.Error(), nil)
-		c.JSON(http.StatusBadRequest, response)
-		return
+		for _, element := range err.(v10.ValidationErrors) {
+			if element.ActualTag() == "required" {
+				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
+				c.JSON(http.StatusBadRequest, response)
+				return
+			} else {
+				if len(fmt.Sprintf("%v", element.Value())) == 0 {
+					break
+				}
+				response.Error(&errorcode.INVALID_PARAMETERS, fmt.Sprintf("tag: %s", element.Field()), nil)
+				c.JSON(http.StatusBadRequest, response)
+				return
+			}
+		}
 	}
 
 	if err := validator.Validate(req); err != nil {

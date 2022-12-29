@@ -61,6 +61,7 @@ func CreateAPIApp() {
 	router.Use(gin.Recovery())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("customEmail", kkva.RegexEmail())
 		v.RegisterValidation("customPhone", kkva.RegexPhone())
 	}
 
