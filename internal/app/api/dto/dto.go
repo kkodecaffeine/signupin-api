@@ -43,10 +43,6 @@ type GetUserWithTokenResponse struct {
 	Phone       string `json:"phone"`       // 전화번호
 }
 
-type PostSignInResponse struct {
-	Id string `json:"id"`
-}
-
 // 비밀번호 수정
 type PutPasswordRequest struct {
 	AuthNumber   string `json:"authnumber" binding:"required" validate:"len=6"`   // 인증번호
