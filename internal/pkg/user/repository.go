@@ -12,7 +12,7 @@ type Repository interface {
 
 	// GET
 	GetAuthNumber() (string, error)
-	GetOne(email string, password ...string) (*dto.GetUserWithTokenResponse, error)
+	GetOne(identifier string, password ...string) (*dto.GetUserWithTokenResponse, error)
 	GetOneByID(ID string) (*dto.GetUserResponse, error)
 
 	// UPDATE

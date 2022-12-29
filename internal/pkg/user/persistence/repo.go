@@ -44,17 +44,21 @@ func (r *userRepo) GetAuthNumber() (string, error) {
 	return found.AuthNumber, nil
 }
 
-func (r *userRepo) GetOne(email string, password ...string) (*dto.GetUserWithTokenResponse, error) {
+func (r *userRepo) GetOne(identifier string, password ...string) (*dto.GetUserWithTokenResponse, error) {
 	found := &user.User{}
 	var filter primitive.M
 
 	if len(password) == 0 {
-		filter = bson.M{"email": email}
+		filter = bson.M{"email": identifier}
 	} else {
 		filter = bson.M{
 			"$and": []bson.M{
-				{"email": email},
 				{"password": password[0]},
+				{
+					"$or": []bson.M{
+						{"email": identifier},
+						{"phone": identifier},
+					}},
 			},
 		}
 	}
