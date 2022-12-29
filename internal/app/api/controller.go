@@ -61,11 +61,10 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 		}
 	}
 
-	authnumber, err := ctrl.usecase.UpsertAuthNumber()
-	if err != nil {
-		response.Error(err.CodeDesc, err.Message, err.Data)
-		c.JSON(err.CodeDesc.HttpStatusCode, response)
-		return
+	// 기존에 생성된 인증번호가 있는지 없는지 확인
+	authnumber, _ := ctrl.usecase.GetAuthNumber()
+	if authnumber == "" {
+		authnumber, _ = ctrl.usecase.UpsertAuthNumber()
 	}
 
 	result := dto.PostSMSResponse{
@@ -189,6 +188,19 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 		return
 	}
 
+	/**
+	 * 로그인 성공 후 인증번호 갱신하는 이유
+	 * 비밀번호 수정 시 토큰이 만료된 경우 토큰도 갱신해야하고 이어서 본인 전화번호 인증 절차가 필요함
+	 * 그런데 인증번호가 갱신되지 않은 상태에서 토큰만 갱신한채로 비밀번호 수정 API 가 성공하는 경우의 수가 발생할 여지가 있음
+	 * 즉, 토큰 갱신 후에 기존에 사용했던 인증번호로 본인 전화번호 인증 절차를 누락한채 비밀번호 수정을 진행할 수 있음
+	 */
+	_, err = ctrl.usecase.UpsertAuthNumber()
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
+	}
+
 	response.Succeed("", found)
 	c.JSON(http.StatusOK, response)
 }
@@ -216,6 +228,10 @@ func (ctrl *Controller) GetMe(c *gin.Context) {
 /**
  * 비밀번호 수정 API
  * JWT 및 요청받은 정보에 대한 검증
+ * JWT 만료된 경우
+ * 		- 1) 회원 로그인 API 를 호출하여 신규 토큰 획득
+ * 		- 2) 이어서 전화번호 인증 API 호출하여 신규 인증번호 획득
+ * 		- 3) 이어서 새로 획득한 인증번호를 요청모델에 담아서 비밀번호 수정 API 호출
  * 기존 비밀번호로 회원 정보 조회에 성공한 후 요청받은 신규 비밀번호로 비밀번호 변경
  */
 func (ctrl *Controller) UpdatePassword(c *gin.Context) {
@@ -242,7 +258,14 @@ func (ctrl *Controller) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	// 사용자가 입력한 "신규 비밀번호"와 "비밀번호 확인" 값이 동일한지 확인
+	// "기존 비밀번호"와 "신규 비밀번호"가 동일한지 확인
+	if req.Password == req.NewPassword || req.Password == req.Confirmation {
+		response.Error(&errorcode.BAD_REQUEST, "same as the existing password", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// 사용자가 입력한 "신규 비밀번호"와 "비밀번호 확인"이 동일한지 확인
 	if req.NewPassword != req.Confirmation {
 		response.Error(&errorcode.BAD_REQUEST, "password mismatch", nil)
 		c.JSON(http.StatusBadRequest, response)

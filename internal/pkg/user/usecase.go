@@ -14,6 +14,7 @@ type Usecase interface {
 	SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError)
 
 	// GET
+	GetAuthNumber() (string, *rest.CustomError)
 	GetOne(identifier string, password ...string) (*dto.GetUserWithTokenResponse, *rest.CustomError)
 	GetOneByID(ID string) (*dto.GetUserResponse, *rest.CustomError)
 
@@ -44,6 +45,21 @@ func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError
 		}
 	}
 	return insertedID, nil
+}
+
+func (u *usecase) GetAuthNumber() (string, *rest.CustomError) {
+	authnumber, err := u.repo.GetAuthNumber()
+	if err != nil {
+		if errortype.IsDecodeError(err) {
+			return "", &rest.CustomError{CodeDesc: &errorcode.FAILED_DB_PROCESSING, Message: err.Error()}
+		} else if errortype.IsNotFoundErr(err) {
+			return "", &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: err.Error()}
+		} else {
+			return "", &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
+		}
+	}
+
+	return authnumber, nil
 }
 
 func (u *usecase) GetOne(identifier string, password ...string) (*dto.GetUserWithTokenResponse, *rest.CustomError) {
