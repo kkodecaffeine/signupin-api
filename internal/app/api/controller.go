@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	v10 "github.com/go-playground/validator/v10"
 	"github.com/kkodecaffeine/go-common/errorcode"
-
 	"github.com/kkodecaffeine/go-common/middleware/token"
+
 	"github.com/kkodecaffeine/go-common/rest"
 
 	"gopkg.in/validator.v2"

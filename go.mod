@@ -8,12 +8,11 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/joho/godotenv v1.4.0
 	github.com/kamva/mgm/v3 v3.5.0
-	github.com/kkodecaffeine/go-common/core/database/mongo/errortype v0.0.0-20221228115011-3ea7f0b07a27
-	github.com/kkodecaffeine/go-common/errorcode v0.0.0-20221228115011-3ea7f0b07a27
-	github.com/kkodecaffeine/go-common/middleware/token v0.0.0-20221228115011-3ea7f0b07a27
-	github.com/kkodecaffeine/go-common/rest v0.0.0-20221228115011-3ea7f0b07a27
-	github.com/kkodecaffeine/go-common/utils v0.0.0-20221228115011-3ea7f0b07a27
-	github.com/kkodecaffeine/go-common/validator v0.0.0-20221228115011-3ea7f0b07a27
+	github.com/kkodecaffeine/go-common/core/database/mongo/errortype v0.0.0-20221229003347-91d421069b9c
+	github.com/kkodecaffeine/go-common/errorcode v0.0.0-20221229003347-91d421069b9c
+	github.com/kkodecaffeine/go-common/rest v0.0.0-20221229004404-e62ee194ca16
+	github.com/kkodecaffeine/go-common/utils v0.0.0-20221229003347-91d421069b9c
+	github.com/kkodecaffeine/go-common/validator v0.0.0-20221229003347-91d421069b9c
 	go.mongodb.org/mongo-driver v1.11.1
 	gopkg.in/validator.v2 v2.0.1
 )
@@ -28,6 +27,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kkodecaffeine/go-common/middleware/token v0.0.0-20221229005331-ff56dcfbf28c // indirect
 	github.com/klauspost/compress v1.15.13 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
