@@ -15,7 +15,6 @@ require (
 	github.com/kkodecaffeine/go-common/utils v0.0.0-20221229010302-355c51ffe317
 	github.com/kkodecaffeine/go-common/validator v0.0.0-20221229012426-cff64c0f400e
 	go.mongodb.org/mongo-driver v1.11.1
-	gopkg.in/validator.v2 v2.0.1
 )
 
 require (

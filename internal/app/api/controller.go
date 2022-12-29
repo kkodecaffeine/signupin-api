@@ -8,9 +8,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 
-	v10 "github.com/go-playground/validator/v10"
+	"github.com/go-playground/validator/v10"
 	"github.com/kkodecaffeine/go-common/errorcode"
 	"github.com/kkodecaffeine/go-common/middleware/token"
 
@@ -48,7 +47,7 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 
 	var req dto.PostSMSRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		for _, element := range err.(v10.ValidationErrors) {
+		for _, element := range err.(validator.ValidationErrors) {
 			if element.ActualTag() == "required" {
 				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
 				c.JSON(http.StatusBadRequest, response)
@@ -86,7 +85,7 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 
 	var req dto.PostSignUpRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		for _, element := range err.(v10.ValidationErrors) {
+		for _, element := range err.(validator.ValidationErrors) {
 			if element.ActualTag() == "required" {
 				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
 				c.JSON(http.StatusBadRequest, response)
@@ -144,7 +143,7 @@ func (ctrl *Controller) SignIn(c *gin.Context) {
 
 	var req dto.PostSignInRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		for _, element := range err.(v10.ValidationErrors) {
+		for _, element := range err.(validator.ValidationErrors) {
 			if element.ActualTag() == "required" {
 				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
 				c.JSON(http.StatusBadRequest, response)
@@ -239,7 +238,7 @@ func (ctrl *Controller) UpdatePassword(c *gin.Context) {
 
 	var req dto.PutPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		for _, element := range err.(v10.ValidationErrors) {
+		for _, element := range err.(validator.ValidationErrors) {
 			if element.ActualTag() == "required" {
 				response.Error(&errorcode.MISSING_PARAMETERS, fmt.Sprintf("required: %s", element.Field()), nil)
 				c.JSON(http.StatusBadRequest, response)
