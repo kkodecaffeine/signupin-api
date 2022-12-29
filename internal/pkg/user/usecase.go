@@ -19,6 +19,7 @@ type Usecase interface {
 
 	// UPDATE
 	UpdatePassword(authnumber, ID, newpassword string) (*dto.GetUserResponse, *rest.CustomError)
+	UpsertAuthNumber() (string, *rest.CustomError)
 }
 
 type usecase struct {
@@ -26,8 +27,8 @@ type usecase struct {
 }
 
 func (u *usecase) SaveOne(req *dto.PostSignUpRequest) (string, *rest.CustomError) {
-	user := newUser(req)
-
+	authnumber, _ := u.repo.GetAuthNumber()
+	user := newUser(req, authnumber)
 	if user == nil {
 		return "", &rest.CustomError{CodeDesc: &errorcode.BAD_REQUEST, Message: "auth number mismatch"}
 	}
@@ -102,8 +103,9 @@ func (u *usecase) GetOneByID(ID string) (*dto.GetUserResponse, *rest.CustomError
 	return response, nil
 }
 
-func (u *usecase) UpdatePassword(authnumber, ID, newpassword string) (*dto.GetUserResponse, *rest.CustomError) {
-	if !compareAuthNumber(authnumber) {
+func (u *usecase) UpdatePassword(reqauth, ID, newpassword string) (*dto.GetUserResponse, *rest.CustomError) {
+	authnumber, _ := u.repo.GetAuthNumber()
+	if !compareAuthNumber(reqauth, authnumber) {
 		return nil, &rest.CustomError{CodeDesc: &errorcode.BAD_REQUEST, Message: "auth number mismatch"}
 	}
 
@@ -119,6 +121,23 @@ func (u *usecase) UpdatePassword(authnumber, ID, newpassword string) (*dto.GetUs
 			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
 		}
 	}
+	return response, nil
+}
+
+func (u *usecase) UpsertAuthNumber() (string, *rest.CustomError) {
+	authnumber := newAuthNumber()
+
+	response, err := u.repo.UpsertAuthNumber(authnumber)
+	if err != nil {
+		if errortype.IsDecodeError(err) {
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_DB_PROCESSING, Message: err.Error()}
+		} else if errortype.IsNotFoundErr(err) {
+			return response, &rest.CustomError{CodeDesc: &errorcode.NOT_FOUND_ERROR, Message: err.Error()}
+		} else {
+			return response, &rest.CustomError{CodeDesc: &errorcode.FAILED_INTERNAL_ERROR, Message: err.Error()}
+		}
+	}
+
 	return response, nil
 }
 

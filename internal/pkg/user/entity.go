@@ -1,9 +1,10 @@
 package user
 
 import (
-	"os"
+	"fmt"
 	"signupin-api/internal/app/api/dto"
 	"strings"
+	"time"
 
 	"github.com/kamva/mgm/v3"
 )
@@ -18,8 +19,13 @@ type User struct {
 	Phone            string `json:"phone" bson:"phone"`       // 전화번혼
 }
 
-func newUser(req *dto.PostSignUpRequest) *User {
-	result := compareAuthNumber(req.AuthNumber)
+type AuthNumber struct {
+	mgm.DefaultModel `bson:",inline"`
+	AuthNumber       string `json:"authnumber" bson:"authnumber"` // 인증번호
+}
+
+func newUser(req *dto.PostSignUpRequest, authnumber string) *User {
+	result := compareAuthNumber(req.AuthNumber, authnumber)
 	if !result {
 		return nil
 	}
@@ -33,6 +39,12 @@ func newUser(req *dto.PostSignUpRequest) *User {
 	}
 }
 
-func compareAuthNumber(authnumber string) bool {
-	return strings.EqualFold(authnumber, os.Getenv("AUTH_NUMBER"))
+func newAuthNumber() *AuthNumber {
+	return &AuthNumber{
+		AuthNumber: fmt.Sprint(time.Now().Nanosecond())[:6],
+	}
+}
+
+func compareAuthNumber(request, authnumber string) bool {
+	return strings.EqualFold(request, authnumber)
 }

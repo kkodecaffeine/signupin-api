@@ -38,7 +38,7 @@ func (app *apiApp) Init() {
 		log.Fatal("Error loading .env file")
 	}
 
-	_ = mgm.SetDefaultConfig(&mgm.Config{CtxTimeout: 12 * time.Second}, "users", options.Client().ApplyURI(os.Getenv("MONGO_URL")))
+	_ = mgm.SetDefaultConfig(&mgm.Config{CtxTimeout: 12 * time.Second}, "kkodecaffeine", options.Client().ApplyURI(os.Getenv("MONGO_URL")))
 }
 
 func (app *apiApp) RegisterRoute(driver *gin.Engine) {

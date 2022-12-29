@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"signupin-api/internal/app/api/dto"
 	"signupin-api/internal/pkg/user"
 	"strings"
@@ -61,11 +60,18 @@ func (ctrl *Controller) SendSMS(c *gin.Context) {
 		}
 	}
 
-	res := dto.PostSMSResponse{
-		AuthNumber: os.Getenv("AUTH_NUMBER"),
+	authnumber, err := ctrl.usecase.UpsertAuthNumber()
+	if err != nil {
+		response.Error(err.CodeDesc, err.Message, err.Data)
+		c.JSON(err.CodeDesc.HttpStatusCode, response)
+		return
 	}
 
-	response.Succeed("", res)
+	result := dto.PostSMSResponse{
+		AuthNumber: authnumber,
+	}
+
+	response.Succeed("", result)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -91,13 +97,7 @@ func (ctrl *Controller) SignUp(c *gin.Context) {
 		return
 	}
 
-	exists, err := ctrl.usecase.GetOne(req.Email)
-	if err != nil {
-		response.Error(err.CodeDesc, err.Message, err.Data)
-		c.JSON(err.CodeDesc.HttpStatusCode, response)
-		return
-	}
-
+	exists, _ := ctrl.usecase.GetOne(req.Email) // 이미 가입한 회원인지 확인
 	if exists != nil {
 		response.Error(&errorcode.AUTH_EMAIL_ALREADY_EXISTS, req.Email, "")
 		c.JSON(errorcode.AUTH_EMAIL_ALREADY_EXISTS.HttpStatusCode, response)

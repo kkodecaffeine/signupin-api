@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type userRepo struct {
@@ -29,6 +30,18 @@ func (r *userRepo) SaveOne(model *user.User) (string, error) {
 
 	insertedID := utils.MapToStringID(model.ID)
 	return insertedID, nil
+}
+
+func (r *userRepo) GetAuthNumber() (string, error) {
+	found := &user.AuthNumber{}
+	filter := bson.D{}
+
+	err := mgm.Coll(found).FindOne(mgm.Ctx(), filter).Decode(found)
+	if err != nil {
+		return "", errortype.ParseAndReturnDBError(err, mgm.CollName(found), filter, nil, nil)
+	}
+
+	return found.AuthNumber, nil
 }
 
 func (r *userRepo) GetOne(email string, password ...string) (*dto.GetUserWithTokenResponse, error) {
@@ -93,6 +106,26 @@ func (r *userRepo) UpdatePassword(ID primitive.ObjectID, newpassword string) (*d
 	result := r.mapper.toDomainProps(found.ID, found)
 
 	return result, nil
+}
+
+func (r *userRepo) UpsertAuthNumber(model *user.AuthNumber) (string, error) {
+	found := &user.AuthNumber{}
+	filter := bson.D{}
+
+	coll := mgm.Coll(found)
+	coll.FindOne(mgm.Ctx(), filter).Decode(&found)
+
+	upsert := true
+	opt := options.UpdateOptions{
+		Upsert: &upsert,
+	}
+
+	err := coll.Update(model, &opt)
+	if err != nil {
+		return "", errortype.ParseAndReturnDBError(err, coll.Name(), nil, nil, nil)
+	}
+
+	return model.AuthNumber, nil
 }
 
 func New(client *mongo.Client) user.Repository {
